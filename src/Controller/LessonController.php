@@ -33,9 +33,9 @@ class LessonController extends AbstractController
     public function new(Request $request): Response
     {
         $course_id = $request->query->get('course_id');
-        $lesson = new Lesson();
         $myCourse = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($course_id);
         if ($myCourse) {
+            $lesson = new Lesson();
             $lesson->setCourse($myCourse);
             $form = $this->createForm(LessonType::class, $lesson);
             $form->handleRequest($request);
@@ -49,10 +49,7 @@ class LessonController extends AbstractController
                 return $response;
             }
         } else {
-            $response = $this->forward('App\Controller\CourseController::show', [
-                'id'  => $course_id
-            ]);
-            return $response;
+            return $this->render('lesson/404.html.twig');
         }
         return $this->render('lesson/new.html.twig', [
             'lesson' => $lesson,
