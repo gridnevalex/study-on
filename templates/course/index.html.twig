@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Study-on{% endblock %}
+
+{% block body %}
+    <h1>Курсы</h1>
+    {% if courses is not empty %}
+        {% for course in courses %}
+        <div>
+            <h3><a href="{{ path('course_show', {'id': course.id}) }}">{{ course.name }}</a></h3>
+            <p>{{ course.description }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>Здесь нет ни одного курса. Добавьте новый курс по кнопке <strong>Новый курс</strong></p>
+    {% endif %}    
+        <hr />
+        <br />
+    <a href="{{ path('course_new') }}">Новый курс</a>
+{% endblock %}
