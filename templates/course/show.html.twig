@@ -3,7 +3,7 @@
 {% block title %}{{course.name}} / Study-on{% endblock %}
 
 {% block body %}
-    <h1>{{course.name}}</h1>
+    <h2>{{course.name}}</h2>
     <p>{{course.description}}</p>
     {% if lessons is not empty %}
     <h3>Уроки</h3>
@@ -15,13 +15,13 @@
     {% else %}
     <p>В данном курсе нет ни одного урока. Нажмите <strong>Добавить урок</strong> для добавления нового урока.</p>
     {% endif %}
-    <br />
-    <hr />
-    <a href="{{ path('course_index') }}">К списку курсов</a>
+    <div class="row">
+    <a class="btn btn-outline-dark mr-2 mt-3 ml-3 btn-sm" href="{{ path('course_index') }}">К списку курсов</a>
 
-    <a href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
+    <a class="btn btn-outline-dark mr-2 mt-3 btn-sm" href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
 
-    <a href="/lessons/new/?course_id={{course.id}}">Добавить урок</a>
+    <a class="btn btn-outline-info mt-3 btn-sm" href="/lessons/new/?course_id={{course.id}}">Добавить урок</a>
 
     {{ include('course/_delete_form.html.twig') }}
+    </div>
 {% endblock %}

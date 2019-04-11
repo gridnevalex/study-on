@@ -3,18 +3,23 @@
 {% block title %}Study-on{% endblock %}
 
 {% block body %}
-    <h1>Курсы</h1>
+    <h2>Курсы</h2>
+    <a class="btn btn-outline-dark mt-2 btn-sm" href="{{ path('course_new') }}">Новый курс</a>
+    <div class="row">
     {% if courses is not empty %}
         {% for course in courses %}
-        <div>
-            <h3><a href="{{ path('course_show', {'id': course.id}) }}">{{ course.name }}</a></h3>
-            <p>{{ course.description }}</p>
+        <div class="col-md-6">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}</h5>  
+                    <p class="card-text">{{ course.description }}</p>
+                    <a class="btn btn-outline-info btn-sm" href="{{ path('course_show', {'id': course.id}) }}" role="button">Пройти курс</a>
+                </div>
+            </div>
         </div>
         {% endfor %}
+    </div>
     {% else %}
     <p>Здесь нет ни одного курса. Добавьте новый курс по кнопке <strong>Новый курс</strong></p>
-    {% endif %}    
-        <hr />
-        <br />
-    <a href="{{ path('course_new') }}">Новый курс</a>
+    {% endif %}   
 {% endblock %}

@@ -1,6 +1,5 @@
 {{ form_start(form) }}
     {{ form_widget(form) }}
-    <br />
-    <hr />
-    <button class="btn">{{ button_label|default('Сохранить') }}</button>
+    <div class="row">
+    <button class="btn btn-outline-info mt-3 ml-3 btn-sm">{{ button_label|default('Сохранить') }}</button>
 {{ form_end(form) }}

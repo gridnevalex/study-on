@@ -24,7 +24,7 @@ class CourseFixtures​ extends Fixture
         $lesson_name = ['Basic Express Setup', 'User API Routes & JWT Authentication', 'Getting Started With React & The Frontend'];
         $lesson_content = 'Building an extensive backend API with Node.js & Express. Protecting routes/endpoints with JWT (JSON Web Tokens)';
         $number = [1, 2, 3];
-        for ($i=0; $i < sizeof($lesson_name); $i++) {
+        for ($i=0; $i < sizeof($lesson_name); $i++) { //sizeof не надо
             $course = $manager->getRepository(Course::class)->find(15);
             $lesson = new Lesson();
             $lesson->setCourse($course);
