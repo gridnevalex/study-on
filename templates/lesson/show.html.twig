@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{lesson.name}} / {{course.name}} / Study-On{% endblock %}
+{% block title %}{{lesson.name}} / {{lesson.getCourse.getName()}} / Study-On{% endblock %}
 
 {% block body %}
     <h2>{{lesson.name}}</h2>
-    <p>Курс <a href="{{ path('course_show', {id: lesson.course.id}) }}">{{course.name}}</a></p>
+    <p>Курс <a href="{{ path('course_show', {id: lesson.getCourse.getId()}) }}">{{lesson.getCourse.getName()}}</a></p>
     <div class="row">
         <a class="btn btn-outline-dark ml-3 mr-2 mt-3 btn-sm" href="{{ path('lesson_edit', {'id': lesson.id}) }}">Редактировать</a>
         {{ include('lesson/_delete_form.html.twig') }}

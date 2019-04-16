@@ -63,8 +63,7 @@ class LessonController extends AbstractController
     public function show(Lesson $lesson): Response
     {
         return $this->render('lesson/show.html.twig', [
-            'lesson' => $lesson,
-            'course' => $lesson->getCourse() // Можно не передавать этот параметр
+            'lesson' => $lesson
         ]);
     }
 
