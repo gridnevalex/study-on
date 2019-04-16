@@ -23,7 +23,6 @@ class CourseFixtures​ extends Fixture
             $lesson->setSerialNumber($number[$i]);
             $manager->persist($lesson);
         }
-
         $manager->flush();
     }
 }

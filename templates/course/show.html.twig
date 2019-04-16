@@ -8,20 +8,17 @@
     {% if lessons is not empty %}
     <h3>Уроки</h3>
     <ol>
-    {% for lesson in lessons %}
-    <li><a href="/lessons/{{lesson.id}}">{{lesson.name}}</a></li>
-    {% endfor %}
+        {% for lesson in lessons %}
+            <li><a href="/lessons/{{lesson.id}}">{{lesson.name}}</a></li>
+        {% endfor %}
     </ol>
     {% else %}
-    <p>В данном курсе нет ни одного урока. Нажмите <strong>Добавить урок</strong> для добавления нового урока.</p>
+        <p>В данном курсе нет ни одного урока. Нажмите <strong>Добавить урок</strong> для добавления нового урока.</p>
     {% endif %}
     <div class="row">
-    <a class="btn btn-outline-dark mr-2 mt-3 ml-3 btn-sm" href="{{ path('course_index') }}">К списку курсов</a>
-
-    <a class="btn btn-outline-dark mr-2 mt-3 btn-sm" href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
-
-    <a class="btn btn-outline-info mt-3 btn-sm" href="/lessons/new/?course_id={{course.id}}">Добавить урок</a>
-
-    {{ include('course/_delete_form.html.twig') }}
+        <a class="btn btn-outline-dark mr-2 mt-3 ml-3 btn-sm" href="{{ path('course_index') }}">К списку курсов</a>
+        <a class="btn btn-outline-dark mr-2 mt-3 btn-sm" href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
+        <a class="btn btn-outline-info mt-3 btn-sm" href="{{ path('lesson_new',  {'course_id': course.id}) }}">Добавить урок</a>
+        {{ include('course/_delete_form.html.twig') }}
     </div>
 {% endblock %}
