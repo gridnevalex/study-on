@@ -38,7 +38,7 @@ class Lesson
     /**
      * @ORM\Column(type="integer", nullable=true)
      * @Assert\NotBlank
-     * @Assert\LessThan(value=1000)
+     * @Assert\LessThan(value=1000, message="Введите число меньше 1000!")
      */
     private $serial_number;
 

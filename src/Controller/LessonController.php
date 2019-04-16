@@ -107,6 +107,5 @@ class LessonController extends AbstractController
         ]);
 
         return $response;
-        //return $this->redirectToRoute('lesson_index');
     }
 }

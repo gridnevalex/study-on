@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace App\Entity;
+namespace App\FixPostgres;
 use Doctrine\DBAL\Schema\PostgreSqlSchemaManager;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 final class FixPostgreSQLDefaultSchemaListener
