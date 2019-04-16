@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Lesson index{% endblock %}
+{% block title %}Lesson index
+{% endblock %}
 
 {% block body %}
     <h1>Lesson index</h1>
@@ -16,22 +17,22 @@
             </tr>
         </thead>
         <tbody>
-        {% for lesson in lessons %}
-            <tr>
-                <td>{{ lesson.id }}</td>
-                <td>{{ lesson.name }}</td>
-                <td>{{ lesson.content }}</td>
-                <td>{{ lesson.serialNumber }}</td>
-                <td>
-                    <a href="{{ path('lesson_show', {'id': lesson.id}) }}">show</a>
-                    <a href="{{ path('lesson_edit', {'id': lesson.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
+            {% for lesson in lessons %}
+                <tr>
+                    <td>{{ lesson.id }}</td>
+                    <td>{{ lesson.name }}</td>
+                    <td>{{ lesson.content }}</td>
+                    <td>{{ lesson.serialNumber }}</td>
+                    <td>
+                        <a href="{{ path('lesson_show', {'id': lesson.id}) }}">show</a>
+                        <a href="{{ path('lesson_edit', {'id': lesson.id}) }}">edit</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">no records found</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 

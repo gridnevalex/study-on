@@ -25,7 +25,7 @@ class LessonType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, array('required' => true, 'attr' => array('class' => 'form-control')))
-            ->add('content',  TextareaType::class, array('required' => true, 'attr' => array('class' => 'form-control')))
+            ->add('content', TextareaType::class, array('required' => true, 'attr' => array('class' => 'form-control')))
             ->add('serial_number', IntegerType::class, array('required' => true, 'attr' => array('class' => 'form-control', 'type' => 'number')))
             ->add('course', HiddenType::class)
         ;

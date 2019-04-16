@@ -34,15 +34,12 @@ class CourseController extends AbstractController
         $course = new Course();
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($course);
             $entityManager->flush();
-
             return $this->redirectToRoute('course_index');
         }
-
         return $this->render('course/new.html.twig', [
             'course' => $course,
             'form' => $form->createView(),
@@ -67,15 +64,12 @@ class CourseController extends AbstractController
     {
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-
             return $this->redirectToRoute('course_index', [
                 'id' => $course->getId(),
             ]);
         }
-
         return $this->render('course/edit.html.twig', [
             'course' => $course,
             'form' => $form->createView(),
@@ -92,7 +86,6 @@ class CourseController extends AbstractController
             $entityManager->remove($course);
             $entityManager->flush();
         }
-
         return $this->redirectToRoute('course_index');
     }
 }

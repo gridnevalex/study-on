@@ -1,11 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{lesson.name}} / Study-on{% endblock %}
+{% block title %}
+    {{lesson.name}}
+    / Study-on
+{% endblock %}
 
 {% block body %}
     <h2>{{lesson.name}}</h2>
-    <p>Курс <a href="{{ path('course_show', {id: lesson.course.id}) }}">{{course.name}}</a></p>
+    <p>Курс
+        <a href="{{ path('course_show', {id: lesson.course.id}) }}">{{course.name}}</a>
+    </p>
     {{ include('lesson/_form.html.twig', {'button_label': 'Сохранить'}) }}
     {{ include('lesson/_delete_form.html.twig') }}
-    </div>
-{% endblock %}
+</div>{% endblock %}
