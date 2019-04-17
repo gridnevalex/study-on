@@ -33,20 +33,24 @@ class LessonController extends AbstractController
     public function new(Request $request): Response
     {
         $course_id = $request->query->get('course_id');
-        $myCourse = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($course_id);
-        if ($myCourse) {
-            $lesson = new Lesson();
-            $lesson->setCourse($myCourse);
-            $form = $this->createForm(LessonType::class, $lesson);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                $entityManager = $this->getDoctrine()->getManager();
-                $entityManager->persist($lesson);
-                $entityManager->flush();
-                $response = $this->forward('App\Controller\CourseController::show', [
+        if ($course_id) {
+            $course = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($course_id);
+            if ($course) {
+                $lesson = new Lesson();
+                $lesson->setCourse($course);
+                $form = $this->createForm(LessonType::class, $lesson);
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->persist($lesson);
+                    $entityManager->flush();
+                    $response = $this->forward('App\Controller\CourseController::show', [
                     'id'  => $course_id
                 ]);
-                return $response;
+                    return $response;
+                }
+            } else {
+                return $this->render('lesson/404.html.twig');
             }
         } else {
             return $this->render('lesson/404.html.twig');

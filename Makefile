@@ -32,3 +32,6 @@ encore_prod:
 
 encore_restart_watch:
 	@${COMPOSE} run node yarn encore dev --watch
+
+phpunit:
+	@${PHP} bin/phpunit
