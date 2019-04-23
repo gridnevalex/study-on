@@ -34,7 +34,7 @@ class Course
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Lesson", mappedBy="course", cascade={"persist", "remove"})
-     * @ORM\OrderBy({"serial_number"="ASC"})
+     * @ORM\OrderBy({"serialNumber"="ASC"})
      */
     private $lessons;
 

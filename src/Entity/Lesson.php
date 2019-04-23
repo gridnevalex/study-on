@@ -40,7 +40,7 @@ class Lesson
      * @Assert\NotBlank
      * @Assert\LessThan(value=1000, message="Введите число меньше 1000!")
      */
-    private $serial_number;
+    private $serialNumber;
 
     public function getId(): ?int
     {
@@ -85,12 +85,12 @@ class Lesson
 
     public function getSerialNumber(): ?int
     {
-        return $this->serial_number;
+        return $this->serialNumber;
     }
 
-    public function setSerialNumber(?int $serial_number): self
+    public function setSerialNumber(?int $serialNumber): self
     {
-        $this->serial_number = $serial_number;
+        $this->serialNumber = $serialNumber;
 
         return $this;
     }

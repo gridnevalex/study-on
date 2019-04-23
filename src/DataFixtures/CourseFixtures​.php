@@ -27,18 +27,18 @@ class CourseFixtures​ extends Fixture
 
         $manager->flush();
 
-        // $courses = $manager->getRepository(Course::class)->findAll();
+        $courses = $manager->getRepository(Course::class)->findAll();
 
-        // for ($i = 0; $i < count($courses); $i++) {
-        //     $course = $manager->getRepository(Course::class)->find($courses[$i]->getId());
-        //     $lesson = new Lesson();
-        //     $lesson->setCourse($course);
-        //     $lesson->setName($lessonName[$i]);
-        //     $lesson->setContent($lessonContent);
-        //     $lesson->setSerialNumber($lessonNumber[$i]);
-        //     $manager->persist($lesson);
-        // }
+        for ($i = 0; $i < count($courses); $i++) {
+            $course = $manager->getRepository(Course::class)->find($courses[$i]->getId());
+            $lesson = new Lesson();
+            $lesson->setCourse($course);
+            $lesson->setName($lessonName[$i]);
+            $lesson->setContent($lessonContent);
+            $lesson->setSerialNumber($lessonNumber[$i]);
+            $manager->persist($lesson);
+        }
 
-        // $manager->flush();
+        $manager->flush();
     }
 }

@@ -52,8 +52,7 @@ class CourseController extends AbstractController
     public function show(Course $course): Response
     {
         return $this->render('course/show.html.twig', [
-            'course' => $course,
-            'lessons' => $course->getLessons()
+            'course' => $course
         ]);
     }
 
@@ -66,9 +65,7 @@ class CourseController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirectToRoute('course_index', [
-                'id' => $course->getId(),
-            ]);
+            return $this->redirectToRoute('course_index');
         }
         return $this->render('course/edit.html.twig', [
             'course' => $course,

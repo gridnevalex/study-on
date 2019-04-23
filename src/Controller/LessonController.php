@@ -50,10 +50,10 @@ class LessonController extends AbstractController
                     return $response;
                 }
             } else {
-                return $this->render('lesson/404.html.twig');
+                return $this->render('404.html.twig');
             }
         } else {
-            return $this->render('lesson/404.html.twig');
+            return $this->render('404.html.twig');
         }
         return $this->render('lesson/new.html.twig', [
             'lesson' => $lesson,
@@ -87,7 +87,6 @@ class LessonController extends AbstractController
         }
         return $this->render('lesson/edit.html.twig', [
             'lesson' => $lesson,
-            'course' => $lesson->getCourse(),
             'form' => $form->createView(),
         ]);
     }
@@ -98,7 +97,7 @@ class LessonController extends AbstractController
     public function delete(Request $request, Lesson $lesson): Response
     {
         if ($this->isCsrfTokenValid('delete'.$lesson->getId(), $request->request->get('_token'))) {
-            $entityManager =   $this->getDoctrine()->getManager();
+            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($lesson);
             $entityManager->flush();
         }
