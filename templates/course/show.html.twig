@@ -8,10 +8,10 @@
 {% block body %}
     <h2>{{course.name}}</h2>
     <p>{{course.description}}</p>
-    {% if course.getLessons is not empty %}
+    {% if course.lessons is not empty %}
         <h3>Уроки</h3>
         <ol>
-            {% for lesson in course.getLessons %}
+            {% for lesson in course.lessons %}
                 <li>
                     <a class="lessonShow" href="{{ path('lesson_show', {'id': lesson.id}) }}">{{lesson.name}}</a>
                 </li>

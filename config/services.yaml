@@ -28,3 +28,8 @@ services:
   App\Doctrine\EventListener\FixPostgreSQLDefaultSchemaListener:
     tags:
       - { name: doctrine.event_listener, event: postGenerateSchema }
+
+  App\Controller\CustomExceptionController:
+    public: true
+    arguments:
+      $debug: "%kernel.debug%"

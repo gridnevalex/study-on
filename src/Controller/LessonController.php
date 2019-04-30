@@ -32,9 +32,9 @@ class LessonController extends AbstractController
      */
     public function new(Request $request): Response
     {
-        $course_id = $request->query->get('course_id');
-        if ($course_id) {
-            $course = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($course_id);
+        $courseId = $request->query->get('course_id');
+        if ($courseId) {
+            $course = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($courseId);
             if ($course) {
                 $lesson = new Lesson();
                 $lesson->setCourse($course);
@@ -45,15 +45,15 @@ class LessonController extends AbstractController
                     $entityManager->persist($lesson);
                     $entityManager->flush();
                     $response = $this->forward('App\Controller\CourseController::show', [
-                    'id'  => $course_id
+                    'id'  => $courseId
                 ]);
                     return $response;
                 }
             } else {
-                return $this->render('404.html.twig');
+                return $this->render('error404.html.twig');
             }
         } else {
-            return $this->render('404.html.twig');
+            return $this->render('error404.html.twig');
         }
         return $this->render('lesson/new.html.twig', [
             'lesson' => $lesson,
