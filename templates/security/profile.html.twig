@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Мой профиль / Study-on
+{% endblock %}
+
+{% block body %}
+    <h4>Email:
+        {{user.getUserName}}</h4>
+    <hr/>
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+        <h4>Роль: Администратор</h4>
+    {% else %}
+        <h4>Роль: Пользователь</h4>
+    {% endif %}
+{% endblock %}

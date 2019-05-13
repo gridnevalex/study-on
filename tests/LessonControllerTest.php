@@ -5,6 +5,7 @@ namespace App\Tests;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\DataFixtures\CourseFixtures​;
 use App\Tests\AbstractTest;
+use App\Tests\Mock\BillingClientMock;
 
 class LessonControllerTest extends AbstractTest
 {
@@ -12,18 +13,19 @@ class LessonControllerTest extends AbstractTest
     {
         return [CourseFixtures​::class];
     }
-    
-    public function testIndexRespose()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/lessons/');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-    }
 
     public function testNewResponse()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $client->clickLink('Добавить урок');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
@@ -32,7 +34,15 @@ class LessonControllerTest extends AbstractTest
     public function testShowResponse()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $crawler = $client->clickLink('Пройти курс');
         $link = $crawler->filter('.lessonShow')->first();
         $client->clickLink($link->text());
@@ -42,7 +52,15 @@ class LessonControllerTest extends AbstractTest
     public function testEditResponse()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $crawler = $client->clickLink('Пройти курс');
         $link = $crawler->filter('.lessonShow')->first()->text();
         $client->clickLink($link);
@@ -75,7 +93,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonAdd()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -89,25 +115,42 @@ class LessonControllerTest extends AbstractTest
     public function testLessonEdit()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $crawler = $client->clickLink('Пройти курс');
-        $link = $crawler->filter('a')->eq(1);
+        $link = $crawler->filter('a')->eq(3);
         $client->clickLink($link->text());
         $crawler = $client->clickLink('Редактировать');
         $form = $crawler->selectButton('Сохранить')->form();
         $form["lesson[name]"] = "Новый урок";
         $form["lesson[content]"] = "Описание нового урока!!!";
         $form["lesson[serialNumber]"] = 5;
-        $crawler = $client->submit($form);
+        $client->submit($form);
+        $crawler = $client->followRedirect();
         $this->assertTrue($crawler->filter('html:contains("Описание нового урока!!!")')->count() > 0);
     }
 
     public function testLessonDelete()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $crawler = $client->clickLink('Пройти курс');
-        $link = $crawler->filter('a')->eq(1);
+        $link = $crawler->filter('a')->eq(3);
         $crawler = $client->clickLink($link->text());
         $form = $crawler->selectButton('Удалить')->form();
         $crawler = $client->submit($form);
@@ -117,7 +160,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonAddWithWrongNumber()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -131,7 +182,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonAddWithBlankName()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -145,7 +204,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonAddWithBlankContent()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -159,7 +226,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonAddWithBlankNumber()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'adminUser@gmail.com';
+        $form["password"] = 'passwordForAdminUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -173,7 +248,15 @@ class LessonControllerTest extends AbstractTest
     public function testLessonsOrderBy()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
+        $crawler = $client->clickLink('Вход');
+        $form = $crawler->selectButton('Войти')->form();
+        $form["email"] = 'simpleUser@gmail.com';
+        $form["password"] = 'passwordForSimpleUser';
+        $client->submit($form);
+        $client->followRedirect();
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -185,6 +268,6 @@ class LessonControllerTest extends AbstractTest
         $form["lesson[content]"] = "Описание еще одного нового урока";
         $form["lesson[serialNumber]"] = 2;
         $crawler = $client->submit($form);
-        $this->assertEquals("Еще один новый урок", $crawler->filter('a')->eq(2)->text());
+        $this->assertEquals("Еще один новый урок", $crawler->filter('a')->eq(3)->text());
     }
 }

@@ -5,7 +5,9 @@
 
 {% block body %}
     <h2>Курсы</h2>
-    <a class="btn btn-outline-dark mt-2 btn-sm" href="{{ path('course_new') }}">Новый курс</a>
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+        <a class="btn btn-outline-dark mt-2 btn-sm" href="{{ path('course_new') }}">Новый курс</a>
+    {% endif %}
     <div class="row">
         {% if courses is not empty %}
             {% for course in courses %}
@@ -21,8 +23,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <p>Здесь нет ни одного курса. Добавьте новый курс по кнопке
-            <strong>Новый курс</strong>
+        <p>Здесь нет ни одного курса.
         </p>
     {% endif %}
 {% endblock %}

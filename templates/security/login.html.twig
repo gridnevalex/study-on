@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Вход / Study-on
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card card-body bg-light mt-3">
+                <form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+                    <h3 class="mb-3 font-weight-normal">Авторизация</h3>
+                    <div class="form-group">
+                        <label for="inputEmail">Email<sup>*</sup>
+                        </label>
+                        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control form-control-lg" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Пароль<sup>*</sup>
+                        </label>
+                        <input class="form-control form-control-lg" id="inputPassword" name="password" required type="password">
+                    </div>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <button class="btn btn-success btn-block" type="submit">
+                        Войти
+                    </button>
+                    <div class="checkbox mb-3 mt-2">
+                        <label>
+                            <input name="_remember_me" type="checkbox">
+                            Запомнить меня
+                        </label>
+                    </div>
+                    <div class="text-center">
+                        Нет аккаунта?
+                        <a href="{{ path('app_register') }}">Зарегистрироваться</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

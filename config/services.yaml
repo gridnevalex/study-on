@@ -33,3 +33,8 @@ services:
     public: true
     arguments:
       $debug: "%kernel.debug%"
+
+  App\Service\BillingClient:
+    public: true
+    arguments:
+      $billingHost: "%env(BILLING_HOST)%"

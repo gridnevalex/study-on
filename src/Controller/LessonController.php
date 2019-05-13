@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Annotation\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/lessons")
@@ -18,17 +19,8 @@ use Symfony\Component\Routing\Annotation\Method;
 class LessonController extends AbstractController
 {
     /**
-     * @Route("/", name="lesson_index", methods={"GET"})
-     */
-    public function index(LessonRepository $lessonRepository): Response
-    {
-        return $this->render('lesson/index.html.twig', [
-            'lessons' => $lessonRepository->findAll(),
-        ]);
-    }
-
-    /**
      * @Route("/new", name="lesson_new", methods={"GET","POST"})
+     * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function new(Request $request): Response
     {
@@ -63,6 +55,7 @@ class LessonController extends AbstractController
 
     /**
      * @Route("/{id}", name="lesson_show", methods={"GET"})
+     * @IsGranted("ROLE_USER")
      */
     public function show(Lesson $lesson): Response
     {
@@ -73,6 +66,7 @@ class LessonController extends AbstractController
 
     /**
      * @Route("/{id}/edit", name="lesson_edit", methods={"GET","POST"})
+     * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function edit(Request $request, Lesson $lesson): Response
     {
@@ -93,6 +87,7 @@ class LessonController extends AbstractController
 
     /**
      * @Route("/{id}", name="lesson_delete", methods={"DELETE"})
+     * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function delete(Request $request, Lesson $lesson): Response
     {
