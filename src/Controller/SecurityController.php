@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Form\RegistrationType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,23 +40,12 @@ class SecurityController extends AbstractController
         if ($auth_checker->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('profile');
         } else {
-            $form = $this->createFormBuilder()
-            ->add('email', TextType::class, array('label' => 'Email*', 'required' => true, 'attr' => array('class' => 'form-control form-control-lg')))
-            ->add('password', PasswordType::class, array('label' => 'Пароль*', 'required' => true,  'attr' => array('class' => 'form-control form-control-lg')))
-            ->add('repeatPassword', PasswordType::class, array('label' => 'Повторите пароль*', 'required' => true,  'attr' => array('class' => 'form-control form-control-lg')))
-            ->add('save', SubmitType::class, array('label' => 'Зарегистрироваться', 'attr' => array('class' => 'btn btn-success btn-block')))
-            ->getForm();
-
+            $form = $this->createForm(RegistrationType::class);
             $form->handleRequest($request);
 
-            if ($form->isSubmitted()) {
+            if ($form->isSubmitted() && $form->isValid()) {
                 $formData = $form->getData();
-                if (strlen(trim($formData['password'])) < 6) {
-                    return $this->render('security/register.html.twig', array(
-                    'form' => $form->createView(),
-                    'error' => "Your password should be at least 6 symbols"
-                ));
-                } elseif (trim($formData['password']) != trim($formData['repeatPassword'])) {
+                if (trim($formData['password']) != trim($formData['repeatPassword'])) {
                     return $this->render('security/register.html.twig', array(
                     'form' => $form->createView(),
                     'error' => "Passwords must be the same"
@@ -69,18 +59,16 @@ class SecurityController extends AbstractController
                         'error' => "Сервис временно недоступен. Попробуйте зарегистрироваться позднее"
                     ));
                     }
-                    $regResponseParse = json_decode($regResponse);
-                    $containsCode = strpos($regResponse, "errors");
-                    if ($containsCode !== false) {
+                    if (array_key_exists('code', $regResponse)) {
                         return $this->render('security/register.html.twig', array(
                         'form' => $form->createView(),
-                        'error' => $regResponseParse->errors
+                        'error' => $regResponse['message']
                     ));
                     } else {
                         $user = new StudyOnUser();
                         $user->setEmail(trim($formData['email']));
-                        $user->setApiToken($regResponseParse->token);
-                        $user->setRoles($regResponseParse->roles);
+                        $user->setApiToken($regResponse['token']);
+                        $user->setRoles($regResponse['roles']);
 
                         return $guardHandler->authenticateUserAndHandleSuccess(
                             $user,
@@ -104,9 +92,7 @@ class SecurityController extends AbstractController
      */
     public function profile(): Response
     {
-        /** @var \App\Security\StudyOnUser $user */
-        $user = $this->getUser();
-        return $this->render('security/profile.html.twig', ['user' => $user]);
+        return $this->render('security/profile.html.twig');
     }
 
     /**

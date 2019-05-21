@@ -3,6 +3,7 @@
 namespace App\Tests\Mock;
 
 use App\Service\BillingClient;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class BillingClientMock extends BillingClient
 {
@@ -15,11 +16,13 @@ class BillingClientMock extends BillingClient
         $trueAdminPassword = "passwordForAdminUser";
 
         if ($username == $trueUserName && $password == $trueUserPassword) {
-            return json_encode(['token' => 'someToken', 'roles' => ["ROLE_USER"]]);
+            return ['token' => 'someToken', 'roles' => ["ROLE_USER"]];
         } elseif ($username == $trueAdminName && $password == $trueAdminPassword) {
-            return json_encode(['token' => 'someToken', 'roles' => ["ROLE_SUPER_ADMIN"]]);
+            return ['token' => 'someToken', 'roles' => ["ROLE_SUPER_ADMIN"]];
+        } elseif ($username == "throwException@mail.ru") {
+            throw new HttpException(500);
         } else {
-            return json_encode(['code' => 401, 'message' => 'Bad credentials, please verify your username and password']);
+            return ['code' => 401, 'message' => 'Bad credentials, please verify your username and password'];
         }
     }
 
@@ -29,11 +32,13 @@ class BillingClientMock extends BillingClient
         $trueUserPassword = "passwordForSimpleUser";
 
         if ($email == $trueUserEmail) {
-            return json_encode(['errors' => ["Email already exists"]]);
+            return ['code' => 400, 'message' => ["Email already exists"]];
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return json_encode(['errors' => ['Invalid email']]);
+            return ['code' => 400, 'message' => ['Invalid email']];
+        } elseif ($email == "throwException@mail.ru") {
+            throw new HttpException(500);
         } else {
-            return json_encode(['token' => 'someToken', 'roles' => ["ROLE_USER"]]);
+            return ['token' => 'someToken', 'roles' => ["ROLE_USER"]];
         }
     }
 }

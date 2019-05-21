@@ -5,7 +5,7 @@
 
 {% block body %}
     <h4>Email:
-        {{user.getUserName}}</h4>
+        {{app.user.getUserName}}</h4>
     <hr/>
     {% if is_granted('ROLE_SUPER_ADMIN') %}
         <h4>Роль: Администратор</h4>

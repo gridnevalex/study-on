@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\DataFixtures\CourseFixtures​;
 use App\Tests\AbstractTest;
 use App\Tests\Mock\BillingClientMock;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SecurityControllerTest extends AbstractTest
 {
@@ -14,10 +15,7 @@ class SecurityControllerTest extends AbstractTest
         return [CourseFixtures​::class];
     }
 
-    /**
-     * Login Tests
-     */
-    public function testAdminLogin()
+    public function authClient($email, $password)
     {
         $client = static::createClient();
         $client->disableReboot();
@@ -25,9 +23,48 @@ class SecurityControllerTest extends AbstractTest
         $client->request('GET', '/courses/');
         $crawler = $client->clickLink('Вход');
         $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'adminUser@gmail.com';
-        $form["password"] = 'passwordForAdminUser';
+        $form["email"] = $email;
+        $form["password"] = $password;
         $client->submit($form);
+        return $client;
+    }
+
+    public function regClient($email, $password, $repeatPassword)
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
+        $client->request('GET', '/courses/');
+        $client->clickLink('Вход');
+        $crawler = $client->clickLink('Зарегистрироваться');
+        $form = $crawler->selectButton('Зарегистрироваться')->form();
+        $form["registration[email]"] = $email;
+        $form["registration[password]"] = $password;
+        $form["registration[repeatPassword]"] = $repeatPassword;
+        $client->submit($form);
+        return $client;
+    }
+
+    public function fillRegForm($client, $email, $password, $repeatPassword)
+    {
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
+        $client->request('GET', '/courses/');
+        $client->clickLink('Вход');
+        $crawler = $client->clickLink('Зарегистрироваться');
+        $form = $crawler->selectButton('Зарегистрироваться')->form();
+        $form["registration[email]"] = $email;
+        $form["registration[password]"] = $password;
+        $form["registration[repeatPassword]"] = $repeatPassword;
+        return $form;
+    }
+
+    /**
+     * Login Tests
+     */
+    public function testAdminLogin()
+    {
+        $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
         $client->followRedirect();
         $crawler = $client->clickLink('adminUser@gmail.com');
         $this->assertTrue($crawler->filter('html:contains("Роль: Администратор")')->count() > 0);
@@ -35,15 +72,7 @@ class SecurityControllerTest extends AbstractTest
 
     public function testUserLogin()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'simpleUser@gmail.com';
-        $form["password"] = 'passwordForSimpleUser';
-        $client->submit($form);
+        $client = $this->authClient('simpleUser@gmail.com', 'passwordForSimpleUser');
         $client->followRedirect();
         $crawler = $client->clickLink('simpleUser@gmail.com');
         $this->assertTrue($crawler->filter('html:contains("Роль: Пользователь")')->count() > 0);
@@ -51,45 +80,21 @@ class SecurityControllerTest extends AbstractTest
 
     public function testLoginWrongEmail()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'user@gmail.com';
-        $form["password"] = 'passwordForSimpleUser';
-        $client->submit($form);
+        $client = $this->authClient('user@gmail.com', 'passwordForSimpleUser');
         $crawler = $client->followRedirect();
         $this->assertTrue($crawler->filter('html:contains("Bad credentials, please verify your username and password")')->count() > 0);
     }
 
     public function testLoginWrongPassword()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'simpleUser@gmail.com';
-        $form["password"] = 'passwordForSimpleUser123';
-        $client->submit($form);
+        $client = $this->authClient('simpleUser@gmail.com', 'passwordForSimpleUser123');
         $crawler = $client->followRedirect();
         $this->assertTrue($crawler->filter('html:contains("Bad credentials, please verify your username and password")')->count() > 0);
     }
 
     public function testUserLogout()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'simpleUser@gmail.com';
-        $form["password"] = 'passwordForSimpleUser';
-        $client->submit($form);
+        $client = $this->authClient('simpleUser@gmail.com', 'passwordForSimpleUser');
         $crawler = $client->followRedirect();
         $crawler = $client->clickLink('simpleUser@gmail.com');
         $this->assertTrue($crawler->filter('html:contains("Роль: Пользователь")')->count() > 0);
@@ -99,22 +104,19 @@ class SecurityControllerTest extends AbstractTest
         $this->assertTrue($crawler->filter('html:contains("Вход")')->count() > 0);
     }
 
+    public function testLoginWithBillingError()
+    {
+        $client = $this->authClient('throwException@mail.ru', 'passwordForSimpleUser');
+        $crawler = $client->followRedirect();
+        $this->assertTrue($crawler->filter('html:contains("Сервис временно недоступен. Попробуйте авторизоваться позднее")')->count() > 0);
+    }
+
     /**
      * Register Tests
      */
     public function testRegisterNewUser()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $client->clickLink('Вход');
-        $crawler = $client->clickLink('Зарегистрироваться');
-        $form = $crawler->selectButton('Зарегистрироваться')->form();
-        $form["form[email]"] = 'user@gmail.com';
-        $form["form[password]"] = '1234567';
-        $form["form[repeatPassword]"] = '1234567';
-        $client->submit($form);
+        $client = $this->regClient('user@gmail.com', '1234567', '1234567');
         $crawler = $client->followRedirect();
         $this->assertTrue($crawler->filter('html:contains("user@gmail.com")')->count() > 0);
     }
@@ -122,108 +124,37 @@ class SecurityControllerTest extends AbstractTest
     public function testRegisterExistingEmail()
     {
         $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $client->clickLink('Вход');
-        $crawler = $client->clickLink('Зарегистрироваться');
-        $form = $crawler->selectButton('Зарегистрироваться')->form();
-        $form["form[email]"] = 'simpleUser@gmail.com';
-        $form["form[password]"] = '1234567';
-        $form["form[repeatPassword]"] = '1234567';
-        $crawler = $client->submit($form);
+        $crawler = $client->submit($this->fillRegForm($client, 'simpleUser@gmail.com', '1234567', '1234567'));
         $this->assertTrue($crawler->filter('html:contains("Email already exists")')->count() > 0);
     }
 
     public function testRegisterShortPassword()
     {
         $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $client->clickLink('Вход');
-        $crawler = $client->clickLink('Зарегистрироваться');
-        $form = $crawler->selectButton('Зарегистрироваться')->form();
-        $form["form[email]"] = 'user@gmail.com';
-        $form["form[password]"] = '123';
-        $form["form[repeatPassword]"] = '123';
-        $crawler = $client->submit($form);
+        $crawler = $client->submit($this->fillRegForm($client, 'simpleUser@gmail.com', '123', '123'));
         $this->assertTrue($crawler->filter('html:contains("Your password should be at least 6 symbols")')->count() > 0);
     }
 
     public function testRegisterDiffPasswords()
     {
         $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $client->clickLink('Вход');
-        $crawler = $client->clickLink('Зарегистрироваться');
-        $form = $crawler->selectButton('Зарегистрироваться')->form();
-        $form["form[email]"] = 'user@gmail.com';
-        $form["form[password]"] = '1234567';
-        $form["form[repeatPassword]"] = '7654321';
-        $crawler = $client->submit($form);
+        $crawler = $client->submit($this->fillRegForm($client, 'simpleUser@gmail.com', '1234567', '7654321'));
         $this->assertTrue($crawler->filter('html:contains("Passwords must be the same")')->count() > 0);
     }
 
     public function testRegisterInvalidEmail()
     {
         $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $client->clickLink('Вход');
-        $crawler = $client->clickLink('Зарегистрироваться');
-        $form = $crawler->selectButton('Зарегистрироваться')->form();
-        $form["form[email]"] = 'usergmail.com';
-        $form["form[password]"] = '1234567';
-        $form["form[repeatPassword]"] = '1234567';
-        $crawler = $client->submit($form);
+        $crawler = $client->submit($this->fillRegForm($client, 'usergmail.com', '1234567', '1234567'));
         $this->assertTrue($crawler->filter('html:contains("Invalid email")')->count() > 0);
     }
 
     public function testRegisterAfterLogin()
     {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'adminUser@gmail.com';
-        $form["password"] = 'passwordForAdminUser';
-        $client->submit($form);
+        $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
         $client->followRedirect();
         $client->request('GET', '/register');
         $this->assertTrue($client->getResponse()->isRedirect('/profile'));
-    }
-
-    /**
-     * Access Control Tests. Anonymous User
-     */
-    public function testAnonymousAddCourse()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/courses/new');
-        $this->assertTrue($client->getResponse()->isRedirect('/login'));
-    }
-
-    public function testAnonymousAddLesson()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/lessons/new');
-        $this->assertTrue($client->getResponse()->isRedirect('/login'));
-    }
-
-    public function testAnonymousLessonShow()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Пройти курс');
-        $link = $crawler->filter('.lessonShow')->first();
-        $client->clickLink($link->text());
-        $this->assertTrue($client->getResponse()->isRedirect('/login'));
     }
 
     public function testAnonymousProfileShow()
@@ -233,38 +164,10 @@ class SecurityControllerTest extends AbstractTest
         $this->assertTrue($client->getResponse()->isRedirect('/login'));
     }
 
-    /**
-     * Access Control Tests. Logged In User
-     */
-    public function testLoggedInUserAddCourse()
+    public function testRegWithBillingError()
     {
         $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'simpleUser@gmail.com';
-        $form["password"] = 'passwordForSimpleUser';
-        $client->submit($form);
-        $client->followRedirect();
-        $crawler = $client->request('GET', '/courses/new');
-        $this->assertTrue($crawler->filter('html:contains("Доступ запрещен!")')->count() > 0);
-    }
-
-    public function testLoggedInUserAddLesson()
-    {
-        $client = static::createClient();
-        $client->disableReboot();
-        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
-        $client->request('GET', '/courses/');
-        $crawler = $client->clickLink('Вход');
-        $form = $crawler->selectButton('Войти')->form();
-        $form["email"] = 'simpleUser@gmail.com';
-        $form["password"] = 'passwordForSimpleUser';
-        $client->submit($form);
-        $client->followRedirect();
-        $crawler = $client->request('GET', '/lessons/new');
-        $this->assertTrue($crawler->filter('html:contains("Доступ запрещен!")')->count() > 0);
+        $crawler = $client->submit($this->fillRegForm($client, 'throwException@mail.ru', '1234567', '1234567'));
+        $this->assertTrue($crawler->filter('html:contains("Сервис временно недоступен. Попробуйте зарегистрироваться позднее")')->count() > 0);
     }
 }

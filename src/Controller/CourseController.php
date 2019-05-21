@@ -49,7 +49,7 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="course_show", methods={"GET"})
+     * @Route("/{id}", name="course_show", requirements={"id"="\d{1,10}"}, methods={"GET"})
      */
     public function show(Course $course): Response
     {

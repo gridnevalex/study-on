@@ -27,6 +27,7 @@ class LessonController extends AbstractController
         $courseId = $request->query->get('course_id');
         if ($courseId) {
             $course = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($courseId);
+            //print_r($course->getId());
             if ($course) {
                 $lesson = new Lesson();
                 $lesson->setCourse($course);
@@ -54,7 +55,7 @@ class LessonController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="lesson_show", methods={"GET"})
+     * @Route("/{id}", name="lesson_show", requirements={"id"="\d{1,10}"}, methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
     public function show(Lesson $lesson): Response

@@ -66,14 +66,12 @@ class StudyOnAuthenticator extends AbstractFormLoginAuthenticator
         } catch (HttpException $ex) {
             throw new CustomUserMessageAuthenticationException("Сервис временно недоступен. Попробуйте авторизоваться позднее");
         }
-        $loginResponseParse = json_decode($loginResponse);
-        $containsCode = strpos($loginResponse, "code");
-        if ($containsCode !== false) {
-            throw new CustomUserMessageAuthenticationException($loginResponseParse->message);
+        if (array_key_exists('code', $loginResponse)) {
+            throw new CustomUserMessageAuthenticationException($loginResponse['message']);
         } else {
             $user = $userProvider->loadUserByUsername($credentials['email']);
-            $user->setApiToken($loginResponseParse->token);
-            $user->setRoles($loginResponseParse->roles);
+            $user->setApiToken($loginResponse['token']);
+            $user->setRoles($loginResponse['roles']);
             return $user;
         }
     }
