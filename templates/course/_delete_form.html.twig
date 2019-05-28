@@ -1,4 +1,4 @@
-<form method="post" action="{{ path('course_delete', {'id': course.id}) }}" onsubmit="return confirm('При удалении курса удалятся все уроки связанные с ним. Продолжить?');">
+<form method="post" action="{{ path('course_delete', {slug: course.slug}) }}" onsubmit="return confirm('При удалении курса удалятся все уроки связанные с ним. Продолжить?');">
     <input name="_method" type="hidden" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ course.id) }}">
     <button class="btn btn-outline-danger mt-3 ml-2 btn-sm">Удалить</button>

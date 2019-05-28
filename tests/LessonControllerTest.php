@@ -88,11 +88,8 @@ class LessonControllerTest extends AbstractTest
         $form["lesson[name]"] = "Новый урок";
         $form["lesson[content]"] = "Описание нового урока";
         $form["lesson[serialNumber]"] = 5;
-        //$em = parent::getEntityManager();
-        //$course = $em->getRepository(Course::class)->findOneBy(['name' => 'MERN Stack Front To Back: Full Stack React, Redux & Node.js']);
-        //var_dump($course->getId());
-        //$form["lesson[course]"] = 40772;
-        $crawler = $client->submit($form);
+        $client->submit($form);
+        $crawler = $client->followRedirect();
         $this->assertEquals(2, $crawler->filter('.lessonShow')->count());
     }
 
@@ -175,22 +172,25 @@ class LessonControllerTest extends AbstractTest
         $this->assertTrue($crawler->filter('html:contains("This value should not be blank")')->count() > 0);
     }
 
-    // public function testLessonsOrderBy()
-    // {
-    //     $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
-    //     $client->clickLink('Пройти курс');
-    //     $crawler = $client->clickLink('Добавить урок');
-    //     $form = $crawler->selectButton('Сохранить')->form();
-    //     $form["lesson[name]"] = "Новый урок";
-    //     $form["lesson[content]"] = "Описание нового урока";
-    //     $form["lesson[serialNumber]"] = 5;
-    //     $client->submit($form);
-    //     $form["lesson[name]"] = "Еще один новый урок";
-    //     $form["lesson[content]"] = "Описание еще одного нового урока";
-    //     $form["lesson[serialNumber]"] = 2;
-    //     $crawler = $client->submit($form);
-    //     $this->assertEquals("Еще один новый урок", $crawler->filter('a')->eq(3)->text());
-    // }
+    public function testLessonsOrderBy()
+    {
+        $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
+        $client->clickLink('Пройти курс');
+        $crawler = $client->clickLink('Добавить урок');
+        $form = $crawler->selectButton('Сохранить')->form();
+        $form["lesson[name]"] = "Новый урок";
+        $form["lesson[content]"] = "Описание нового урока";
+        $form["lesson[serialNumber]"] = 10;
+        $client->submit($form);
+        $crawler = $client->followRedirect();
+        $form["lesson[name]"] = "Еще один новый урок";
+        $form["lesson[content]"] = "Описание еще одного нового урока";
+        $form["lesson[serialNumber]"] = 8;
+        $client->submit($form);
+        $crawler = $client->followRedirect();
+        print_r($crawler);
+        $this->assertEquals("Еще один новый урок", $crawler->filter('a')->eq(4)->text());
+    }
 
     public function testAnonymousAddLesson()
     {

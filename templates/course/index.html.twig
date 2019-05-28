@@ -16,7 +16,7 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ course.name }}</h5>
                             <p class="card-text">{{ course.description }}</p>
-                            <a class="btn btn-outline-info btn-sm" href="{{ path('course_show', {'id': course.id}) }}" role="button">Пройти курс</a>
+                            <a class="btn btn-outline-info btn-sm" href="{{ path('course_show', {slug: course.slug}) }}" role="button">Пройти курс</a>
                         </div>
                     </div>
                 </div>

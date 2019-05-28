@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20190417094706 extends AbstractMigration
+final class Version20190524070108 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,8 +22,7 @@ final class Version20190417094706 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('CREATE SEQUENCE course_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE SEQUENCE lesson_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_169E6FB9989D9B62 ON course (slug)');
     }
 
     public function down(Schema $schema) : void
@@ -31,7 +30,6 @@ final class Version20190417094706 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('DROP SEQUENCE course_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE lesson_id_seq CASCADE');
+        $this->addSql('DROP INDEX UNIQ_169E6FB9989D9B62');
     }
 }

@@ -27,7 +27,6 @@ class LessonController extends AbstractController
         $courseId = $request->query->get('course_id');
         if ($courseId) {
             $course = $this->getDoctrine()->getManager()->getRepository(Course::class)->find($courseId);
-            //print_r($course->getId());
             if ($course) {
                 $lesson = new Lesson();
                 $lesson->setCourse($course);
@@ -36,10 +35,10 @@ class LessonController extends AbstractController
                 if ($form->isSubmitted() && $form->isValid()) {
                     $entityManager = $this->getDoctrine()->getManager();
                     $entityManager->persist($lesson);
+                    $course->addLesson($lesson);
+                    $entityManager->persist($course);
                     $entityManager->flush();
-                    $response = $this->forward('App\Controller\CourseController::show', [
-                    'id'  => $courseId
-                ]);
+                    $response = $this->redirectToRoute('course_show', ['slug' => $course->getSlug()]);
                     return $response;
                 }
             } else {
@@ -98,7 +97,7 @@ class LessonController extends AbstractController
             $entityManager->flush();
         }
         $response = $this->forward('App\Controller\CourseController::show', [
-            'id'  => $lesson->getCourse()->getId()
+            'slug'  => $lesson->getCourse()->getSlug()
         ]);
         return $response;
     }

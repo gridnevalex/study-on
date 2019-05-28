@@ -131,7 +131,8 @@ class CourseControllerTest extends AbstractTest
         $form["lesson[name]"] = 'Новый урок';
         $form["lesson[content]"] = 'Описание нового урока';
         $form["lesson[serialNumber]"] = 10;
-        $crawler = $client->submit($form);
+        $client->submit($form);
+        $crawler = $client->followRedirect();
         $form = $crawler->selectButton('Удалить')->form();
         $client->submit($form);
         $crawler = $client->followRedirect();

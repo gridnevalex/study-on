@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Course;
+use Cocur\Slugify\Slugify;
 use App\Form\CourseType;
 use App\Repository\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,6 +38,8 @@ class CourseController extends AbstractController
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $slugify = new Slugify();
+            $course->setSlug($slugify->slugify($form->get('name')->getData()));
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($course);
             $entityManager->flush();
@@ -49,7 +52,7 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="course_show", requirements={"id"="\d{1,10}"}, methods={"GET"})
+     * @Route("/{slug}", name="course_show", methods={"GET"})
      */
     public function show(Course $course): Response
     {
@@ -59,7 +62,7 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/edit", name="course_edit", methods={"GET","POST"})
+     * @Route("/{slug}/edit", name="course_edit", methods={"GET","POST"})
      * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function edit(Request $request, Course $course): Response
@@ -67,6 +70,8 @@ class CourseController extends AbstractController
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $slugify = new Slugify();
+            $course->setSlug($slugify->slugify($form->get('name')->getData()));
             $this->getDoctrine()->getManager()->flush();
             return $this->redirectToRoute('course_index');
         }
@@ -77,7 +82,7 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="course_delete", methods={"DELETE"})
+     * @Route("/{slug}", name="course_delete", methods={"DELETE"})
      * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function delete(Request $request, Course $course): Response

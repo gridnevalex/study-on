@@ -8,7 +8,7 @@
 {% block body %}
     <h2>{{lesson.name}}</h2>
     <p>Курс
-        <a href="{{ path('course_show', {id: lesson.course.id}) }}">{{lesson.course.name}}</a>
+        <a href="{{ path('course_show', {slug: lesson.course.slug}) }}">{{lesson.course.name}}</a>
     </p>
     {{ include('lesson/_form.html.twig', {'button_label': 'Сохранить'}) }}
 {% endblock %}

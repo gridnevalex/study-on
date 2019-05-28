@@ -8,10 +8,10 @@
 {% block body %}
     <h2>{{course.name}}</h2>
     <p>{{course.description}}</p>
-    {% if course.lessons is not empty %}
+    {% if course.getLessons is not empty %}
         <h3>Уроки</h3>
         <ol>
-            {% for lesson in course.lessons %}
+            {% for lesson in course.getLessons %}
                 <li>
                     <a class="lessonShow" href="{{ path('lesson_show', {'id': lesson.id}) }}">{{lesson.name}}</a>
                 </li>
@@ -23,7 +23,7 @@
     <div class="row">
         <a class="btn btn-outline-dark mr-2 mt-3 ml-3 btn-sm" href="{{ path('course_index') }}">К списку курсов</a>
         {% if is_granted('ROLE_SUPER_ADMIN') %}
-            <a class="btn btn-outline-dark mr-2 mt-3 btn-sm" href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
+            <a class="btn btn-outline-dark mr-2 mt-3 btn-sm" href="{{ path('course_edit', {slug: course.slug}) }}">Редактировать курс</a>
             <a class="btn btn-outline-info mt-3 btn-sm" href="{{ path('lesson_new', {'course_id': course.id}) }}">Добавить урок</a>
             {{ include('course/_delete_form.html.twig') }}
         {% endif %}

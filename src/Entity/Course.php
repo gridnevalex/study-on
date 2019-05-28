@@ -4,11 +4,17 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CourseRepository")
+ * @UniqueEntity(
+ *    fields={"name"},
+ *    message="Данное имя курса занято. Попробуйте другое"
+ * )
  */
 class Course
 {
@@ -23,6 +29,7 @@ class Course
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank
+     * @Assert\LessThan(255)
      */
     private $name;
 
@@ -31,12 +38,16 @@ class Course
      * @Assert\NotBlank
      */
     private $description;
-
+    
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Lesson", mappedBy="course", cascade={"persist", "remove"})
-     * @ORM\OrderBy({"serialNumber"="ASC"})
      */
     private $lessons;
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     */
+    private $slug;
 
     public function __construct()
     {
@@ -77,7 +88,10 @@ class Course
      */
     public function getLessons(): Collection
     {
-        return $this->lessons;
+        $orderBy = (Criteria::create())->orderBy([
+            'serialNumber' => Criteria::ASC,
+        ]);
+        return $this->lessons->matching($orderBy);
     }
 
     public function addLesson(Lesson $lesson): self
@@ -99,6 +113,18 @@ class Course
                 $lesson->setCourse(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

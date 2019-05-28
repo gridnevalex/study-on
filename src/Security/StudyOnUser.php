@@ -10,7 +10,21 @@ class StudyOnUser implements UserInterface
 
     private $apiToken;
 
+    private $refreshToken​;
+
     private $roles = [];
+
+    public function getRefreshToken(): ?string
+    {
+        return $this->refreshToken​;
+    }
+
+    public function setRefreshToken($refreshToken): self
+    {
+        $this->refreshToken​ = $refreshToken;
+
+        return $this;
+    }
 
     public function getApiToken(): ?string
     {

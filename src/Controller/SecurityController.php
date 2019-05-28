@@ -67,6 +67,7 @@ class SecurityController extends AbstractController
                     } else {
                         $user = new StudyOnUser();
                         $user->setEmail(trim($formData['email']));
+                        $user->setRefreshToken($regResponse['refresh_token']);
                         $user->setApiToken($regResponse['token']);
                         $user->setRoles($regResponse['roles']);
 
@@ -90,9 +91,9 @@ class SecurityController extends AbstractController
      * @Route("/profile", name="profile", methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
-    public function profile(): Response
+    public function profile(BillingClient $billingClient): Response
     {
-        return $this->render('security/profile.html.twig');
+        return $this->render('security/profile.html.twig', array('balance' => $billingClient->getCurentUserBalance($this->getUser()->getApiToken())));
     }
 
     /**
