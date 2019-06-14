@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Course;
-use Cocur\Slugify\Slugify;
 use App\Form\CourseType;
 use App\Repository\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,8 +37,6 @@ class CourseController extends AbstractController
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $slugify = new Slugify();
-            $course->setSlug($slugify->slugify($form->get('name')->getData()));
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($course);
             $entityManager->flush();
@@ -70,8 +67,6 @@ class CourseController extends AbstractController
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $slugify = new Slugify();
-            $course->setSlug($slugify->slugify($form->get('name')->getData()));
             $this->getDoctrine()->getManager()->flush();
             return $this->redirectToRoute('course_index');
         }

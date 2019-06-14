@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CourseRepository")
@@ -45,6 +46,7 @@ class Course
     private $lessons;
 
     /**
+     * @Gedmo\Slug(fields={"name"}, updatable=true)
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private $slug;

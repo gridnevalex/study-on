@@ -53,7 +53,11 @@ class BillingClient
         }
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Authorization: Bearer ' . $token));
 
-        $result = curl_exec($ch);
+        try {
+            $result = curl_exec($ch);
+        } catch (HttpException $e) {
+            throw new HttpException(503);
+        }
 
         if ($result === false) {
             throw new HttpException(503, curl_error($ch));
