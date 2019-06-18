@@ -188,7 +188,6 @@ class LessonControllerTest extends AbstractTest
         $form["lesson[serialNumber]"] = 8;
         $client->submit($form);
         $crawler = $client->followRedirect();
-        print_r($crawler);
         $this->assertEquals("Еще один новый урок", $crawler->filter('a')->eq(4)->text());
     }
 

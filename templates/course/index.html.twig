@@ -16,7 +16,34 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ course.name }}</h5>
                             <p class="card-text">{{ course.description }}</p>
-                            <a class="btn btn-outline-info btn-sm" href="{{ path('course_show', {slug: course.slug}) }}" role="button">Пройти курс</a>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <a class="btn btn-outline-info btn-sm" href="{{ path('course_show', {slug: course.slug}) }}" role="button">Пройти курс</a>
+                                </div>
+                                <div class="col-md-4">
+                                    {% if is_granted('ROLE_USER') %}
+                                        {% if course.transaction_type is defined %}
+                                            {% if course.type is same as('buy') %}
+                                                <span class="badge badge-primary">
+                                                    Куплено
+                                                </span>
+                                            {% elseif course.type is same as('rent') %}
+                                                <span class="badge badge-warning">
+                                                    Аренда до
+                                                    {{ course.expires_at|date("d.m.Y") }}
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if course.type is same as('free')  %}
+                                        <span class="badge badge-success">Бесплатный курс</span>
+                                    {% else %}
+                                        <span class="badge badge-success">
+                                            {{ course.price }}
+                                            $</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

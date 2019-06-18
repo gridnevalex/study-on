@@ -34,6 +34,44 @@ class BillingClient
         return $this->execCurl("POST", json_encode(['refresh_token' => $refreshToken]), '/api/v1/token/refresh', '');
     }
 
+    public function getCourses()
+    {
+        return $this->execCurl("GET", '', '/api/v1/courses', '');
+    }
+
+    public function getCourseByCode($slug)
+    {
+        return $this->execCurl("GET", '', '/api/v1/courses/'. $slug, '');
+    }
+
+    public function buyCourse($slug, $token)
+    {
+        return $this->execCurl('POST', '', '/api/v1/courses/'.$slug.'/pay', $token);
+    }
+
+    public function getPaymentTransactions($token)
+    {
+        try {
+            return $this->execCurl('GET', '', '/api/v1/transactions?type=payment&skip_expired=true', $token);
+        } catch (HttpException $e) {
+            return '';
+        }
+    }
+
+    public function getTransactionByCode($slug, $token)
+    {
+        try {
+            return $this->execCurl('GET', '', '/api/v1/transactions?skip_expired=true&course_code='.$slug, $token);
+        } catch (HttpException $e) {
+            return '';
+        }
+    }
+
+    public function getAllTransactions($token)
+    {
+        return $this->execCurl('GET', '', '/api/v1/transactions', $token);
+    }
+
     public function decodePayload($token)
     {
         $tokenParts = explode(".", $token);

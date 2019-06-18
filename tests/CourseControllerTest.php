@@ -69,7 +69,7 @@ class CourseControllerTest extends AbstractTest
     public function testCourse404()
     {
         $client = static::createClient();
-        $client->request('GET', '/courses/25');
+        $client->request('GET', '/courses/mern-stack');
         $this->assertEquals(404, $client->getResponse()->getStatusCode());
     }
 
@@ -85,7 +85,7 @@ class CourseControllerTest extends AbstractTest
         $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
         $crawler = $client->clickLink('Новый курс');
         $form = $crawler->selectButton('Сохранить')->form();
-        $form["course[name]"] = 'Новый курс';
+        $form["course[name]"] = 'new course';
         $form["course[description]"] = 'Описание нового курса';
         $client->submit($form);
         $crawler = $client->followRedirect();
@@ -98,7 +98,7 @@ class CourseControllerTest extends AbstractTest
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Редактировать курс');
         $form = $crawler->selectButton('Сохранить')->form();
-        $form["course[name]"] = 'Новый курc';
+        $form["course[name]"] = 'new course';
         $form["course[description]"] = 'Описание нового курса!!!';
         $client->submit($form);
         $crawler = $client->followRedirect();
@@ -120,7 +120,7 @@ class CourseControllerTest extends AbstractTest
         $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
         $crawler = $client->clickLink('Новый курс');
         $form = $crawler->selectButton('Сохранить')->form();
-        $form["course[name]"] = 'Новый курс';
+        $form["course[name]"] = 'new course';
         $form["course[description]"] = 'Описание нового курса';
         $client->submit($form);
         $crawler = $client->followRedirect();

@@ -97,6 +97,15 @@ class SecurityController extends AbstractController
     }
 
     /**
+     * @Route("/transactions", name="transactions", methods={"GET"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function transactions(BillingClient $billingClient): Response
+    {
+        return $this->render('security/transactions.html.twig', array('transactions' => $billingClient->getAllTransactions($this->getUser()->getApiToken())));
+    }
+
+    /**
      * @Route("/logout", name="app_logout", methods={"GET"})
      */
     public function logout()

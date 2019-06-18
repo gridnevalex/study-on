@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Course;
 use App\Form\CourseType;
+use App\Service\BillingClient;
 use App\Repository\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Annotation\Method;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
@@ -20,10 +22,10 @@ class CourseController extends AbstractController
     /**
      * @Route("/", name="course_index", methods={"GET"})
      */
-    public function index(CourseRepository $courseRepository): Response
+    public function index(CourseRepository $courseRepository, BillingClient $billingClient): Response
     {
         return $this->render('course/index.html.twig', [
-            'courses' => $courseRepository->findAll(),
+            'courses' => $courseRepository->findAllCombined($billingClient, $this->getUser())
         ]);
     }
 
@@ -51,11 +53,19 @@ class CourseController extends AbstractController
     /**
      * @Route("/{slug}", name="course_show", methods={"GET"})
      */
-    public function show(Course $course): Response
+    public function show($slug, CourseRepository $courseRepository, BillingClient $billingClient): Response
     {
-        return $this->render('course/show.html.twig', [
-            'course' => $course
-        ]);
+        $auth_checker = $this->get('security.authorization_checker');
+        if ($auth_checker->isGranted('ROLE_USER')) {
+            return $this->render('course/show.html.twig', [
+                'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser()),
+                'user_balance' => $billingClient->getCurentUserBalance($this->getUser()->getApiToken())
+            ]);
+        } else {
+            return $this->render('course/show.html.twig', [
+                'course' => $courseRepository->findOneCombined($slug, $billingClient, null)
+            ]);
+        }
     }
 
     /**
@@ -88,5 +98,25 @@ class CourseController extends AbstractController
             $entityManager->flush();
         }
         return $this->redirectToRoute('course_index');
+    }
+
+    /**
+     * @Route("/coursepay/{slug}", name="course_pay", methods={"POST"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function buyCourse($slug, BillingClient $billingClient, CourseRepository $courseRepository): Response
+    {
+        $result = $billingClient->buyCourse($slug, $this->getUser()->getApiToken());
+        if (array_key_exists('success', $result)) {
+            $this->addFlash('success', 'Курс успешно оплачен');
+            return $this->render('course/show.html.twig', [
+                    'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser())
+                ]);
+        } elseif (array_key_exists('message', $result)) {
+            $this->addFlash('error', $result['message']);
+            return $this->render('course/show.html.twig', [
+                'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser())
+            ]);
+        }
     }
 }
