@@ -29,7 +29,11 @@
                             {% endif %}
                             {% if transaction.course_code is defined %}
                                 <td>
-                                    <a href="{{ path('course_show', {slug: transaction.course_code}) }}">{{ transaction.course_code }}</a>
+                                    {% if transaction.course_code in slugs %}
+                                        <a href="{{ path('course_show', {slug: transaction.course_code}) }}">{{ transaction.course_code }}</a>
+                                    {% else %}
+                                        {{ transaction.course_code }}
+                                    {% endif %}
                                 </td>
                             {% else %}
                                 <td>-</td>

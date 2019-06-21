@@ -21,6 +21,21 @@ class CourseRepository extends ServiceEntityRepository
         parent::__construct($registry, Course::class);
     }
 
+    public function getAllSlugs()
+    {
+        $finalSlugs = [];
+
+        $slugs = $this->createQueryBuilder('c')
+            ->select('c.slug')
+            ->getQuery()
+            ->getResult();
+        
+        foreach ($slugs as $slug) {
+            array_push($finalSlugs, $slug['slug']);
+        }
+        return $finalSlugs;
+    }
+
     public function findAllCombined($billingClient, $user)
     {
         $coursesStudyOn = $this->createQueryBuilder('c')

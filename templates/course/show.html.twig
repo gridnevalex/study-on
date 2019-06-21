@@ -27,7 +27,7 @@
                 {% if course.type is same as('rent') %}
                     <a class="{{ course.price > user_balance ? 'btn btn-outline-warning mr-2 mt-3 btn-sm text-dark disabled' : 'btn btn-outline-warning mr-2 mt-3 btn-sm text-dark' }}" data-target="#confirmBuyModal" data-toggle="modal" href="#">Арендовать курс</a>
                 {% elseif course.type is same as('buy') %}
-                    <a class="{{ course.price > user_balance ? 'btn btn-outline-warning mr-2 mt-3 btn-sm text-dark disabled' : 'btn btn-outline-warning mr-2 mt-3 btn-sm text-dark' }}" data-target="#confirmBuyModal" data-toggle="modal" href="#">Купить курс</a>
+                    <a class="{{ course.price > user_balance ? 'btn btn-outline-primary mr-2 mt-3 btn-sm text-dark disabled' : 'btn btn-outline-primary mr-2 mt-3 btn-sm text-dark' }}" data-target="#confirmBuyModal" data-toggle="modal" href="#">Купить курс</a>
                 {% endif %}
                 <div aria-hidden="true" aria-labelledby="exampleModalLongTitle" class="modal fade" id="confirmBuyModal" role="dialog" tabindex="-1">
                     <div class="modal-dialog" role="document">

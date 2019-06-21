@@ -1,0 +1,21 @@
+[
+  {
+    "code": "mern-stack-front-to-back-full-stack-react-redux-node-js",
+    "type": "rent",
+    "price": 25.55
+  },
+  {
+    "code": "build-a-blockchain-and-a-cryptocurrency-from-scratch",
+    "type": "buy",
+    "price": 20.25
+  },
+  {
+    "code": "java-programming-masterclass-for-software-developers",
+    "type": "free"
+  },
+  {
+    "code": "symfony-course-from-absolute-zero",
+    "type": "buy",
+    "price": 5000.0
+  }
+]
