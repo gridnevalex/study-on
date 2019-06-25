@@ -13,4 +13,16 @@ require("jquery");
 require("bootstrap");
 require("popper.js");
 
+var $ = require("jquery");
+
 console.log("Hello Webpack Encore! Edit me in assets/js/app.js");
+
+$(document).on("change", "#course_type", function() {
+  if (
+    $(this)
+      .find("option:selected")
+      .attr("value") == "free"
+  ) {
+    $("#course_price").val("0");
+  }
+});

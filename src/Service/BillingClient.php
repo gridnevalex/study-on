@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Cocur\Slugify\Slugify;
 
 class BillingClient
 {
@@ -49,6 +50,23 @@ class BillingClient
         return $this->execCurl('POST', '', '/api/v1/courses/'.$slug.'/pay', $token);
     }
 
+    public function addCourse($course, $token)
+    {
+        $slugify = new Slugify();
+        return $this->execCurl("POST", json_encode(['code' => $slugify->slugify($course['name']), 'title' => $course['name'], 'type' => $course['type'], 'price' => $course['price']]), '/api/v1/courses', $token);
+    }
+
+    public function updateCourse($course, $slug, $token)
+    {
+        $slugify = new Slugify();
+        return $this->execCurl("POST", json_encode(['code' => $slugify->slugify($course['name']), 'title' => $course['name'], 'type' => $course['type'], 'price' => $course['price']]), '/api/v1/courses/'. $slug, $token);
+    }
+
+    public function deleteCourse($slug, $token)
+    {
+        return $this->execCurl("DELETE", '', '/api/v1/courses/'. $slug, $token);
+    }
+
     public function getPaymentTransactions($token)
     {
         try {
@@ -88,6 +106,8 @@ class BillingClient
         if ($method == "POST") {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        } elseif ($method == "DELETE") {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         }
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Authorization: Bearer ' . $token));
 

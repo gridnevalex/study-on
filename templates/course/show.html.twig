@@ -6,6 +6,15 @@
 {% endblock %}
 
 {% block body %}
+    {% if error %}
+        {% if error is iterable %}
+            {% for er in error %}
+                <div class="alert alert-danger">{{ er }}</div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+    {% endif %}
     <h2>{{course.name}}</h2>
     <p>{{course.description}}</p>
     {% if course.lessons is not empty %}

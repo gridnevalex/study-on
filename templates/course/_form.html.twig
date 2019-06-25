@@ -1,6 +1,38 @@
 {% form_theme form 'form_errors.html.twig' %}
 {{ form_start(form) }}
-{{ form_widget(form) }}
+{{ form_errors(form) }}
+{% if error %}
+    {% if error is iterable %}
+        {% for er in error %}
+            <div class="alert alert-danger">{{ er }}</div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+{% endif %}
+{% if course is not defined %}
+    {{ form_widget(form) }}
+{% else %}
+    <div class="form-group">
+        {{ form_row(form.name, {'value' : course.name}) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.description, {'value' : course.description}) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.type, {'value' : course.type}) }}
+    </div>
+
+    <div class="form-group">
+        {% if course.price is not defined %}
+            {{ form_row(form.price, {'value' : 0.0}) }}
+        {% else %}
+            {{ form_row(form.price, {'value' : course.price}) }}
+        {% endif %}
+    </div>
+
+
+{% endif %}
 <div class="row">
     <button class="btn btn-outline-info mt-3 ml-3 btn-sm">{{ button_label|default('Сохранить') }}</button>
     {{ form_end(form) }}

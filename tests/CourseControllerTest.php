@@ -63,7 +63,7 @@ class CourseControllerTest extends AbstractTest
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/courses/');
-        $this->assertEquals(3, $crawler->filter('.card-title')->count());
+        $this->assertEquals(4, $crawler->filter('.card-title')->count());
     }
 
     public function testCourse404()
@@ -87,9 +87,11 @@ class CourseControllerTest extends AbstractTest
         $form = $crawler->selectButton('Сохранить')->form();
         $form["course[name]"] = 'new course';
         $form["course[description]"] = 'Описание нового курса';
-        $client->submit($form);
+        $form["course[type]"] = 'buy';
+        $form["course[price]"] = '50.5';
+        $crawler = $client->submit($form);
         $crawler = $client->followRedirect();
-        $this->assertEquals(4, $crawler->filter('.card-title')->count());
+        $this->assertEquals(5, $crawler->filter('.card-title')->count());
     }
 
     public function testCourseEdit()
@@ -98,7 +100,7 @@ class CourseControllerTest extends AbstractTest
         $client->clickLink('Пройти курс');
         $crawler = $client->clickLink('Редактировать курс');
         $form = $crawler->selectButton('Сохранить')->form();
-        $form["course[name]"] = 'new course';
+        $form["course[name]"] = 'new-course!';
         $form["course[description]"] = 'Описание нового курса!!!';
         $client->submit($form);
         $crawler = $client->followRedirect();
@@ -112,7 +114,7 @@ class CourseControllerTest extends AbstractTest
         $form = $crawler->selectButton('Удалить')->form();
         $client->submit($form);
         $crawler = $client->followRedirect();
-        $this->assertEquals(2, $crawler->filter('.card-title')->count());
+        $this->assertEquals(3, $crawler->filter('.card-title')->count());
     }
 
     public function testCourseDeleteWithLessons()
@@ -122,6 +124,8 @@ class CourseControllerTest extends AbstractTest
         $form = $crawler->selectButton('Сохранить')->form();
         $form["course[name]"] = 'new course';
         $form["course[description]"] = 'Описание нового курса';
+        $form["course[type]"] = 'buy';
+        $form["course[price]"] = '50.5';
         $client->submit($form);
         $crawler = $client->followRedirect();
         $link = $crawler->filter('a')->last();
@@ -136,7 +140,7 @@ class CourseControllerTest extends AbstractTest
         $form = $crawler->selectButton('Удалить')->form();
         $client->submit($form);
         $crawler = $client->followRedirect();
-        $this->assertEquals(3, $crawler->filter('.card-title')->count());
+        $this->assertEquals(4, $crawler->filter('.card-title')->count());
     }
 
     public function testCourseAddWithBlankName()
@@ -147,7 +151,7 @@ class CourseControllerTest extends AbstractTest
         $form["course[name]"] = '';
         $form["course[description]"] = 'Описание нового курса';
         $crawler = $client->submit($form);
-        $this->assertTrue($crawler->filter('html:contains("This value should not be blank")')->count() > 0);
+        $this->assertTrue($crawler->filter('html:contains("This value must no be empty")')->count() > 0);
     }
 
     public function testCourseAddWithBlankDescriprion()
@@ -158,7 +162,7 @@ class CourseControllerTest extends AbstractTest
         $form["course[name]"] = 'Новый курс';
         $form["course[description]"] = '';
         $crawler = $client->submit($form);
-        $this->assertTrue($crawler->filter('html:contains("This value should not be blank")')->count() > 0);
+        $this->assertTrue($crawler->filter('html:contains("This value must no be empty")')->count() > 0);
     }
 
     public function testAnonymousAddCourse()

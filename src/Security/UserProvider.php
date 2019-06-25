@@ -55,11 +55,12 @@ class UserProvider implements UserProviderInterface
         }
 
         $expTime = $this->billingClient->decodePayload($user->getApiToken())->exp;
-        $currentDate = ((new \DateTime())->modify('+1 minute'))->getTimestamp();
+        $currentDate = ((new \DateTime())->modify('+1 hour'))->getTimestamp();
 
         if ($currentDate > $expTime) {
             $response = $this->billingClient->sendRefreshRequest($user->getRefreshToken());
             $user->setApiToken($response['token']);
+            //$user->setApiToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NjEzODAwMDQsImV4cCI6MTU2MTM4MDAzNCwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoic2ltcGxlVXNlckBnbWFpbC5jb20ifQ.XF2CurGJ6dq6T8pKFfz-WFMzWsDmoHSHMLK3QzDepvla29-dzXsy0U5J_yINdRItMDv5rsdVH4B0e1Qs19-MteWMJBCsUkj4Hh5Ca70sQl5EN1Eu6ceGGte6Jzw9OK7yCSu1I917qklxcTZ3ZmAL3a6-UQK5nDN5LKpHGJ82oZ4kZfJSM_fNjVpSpHgT7yRELXH6P9NDok2ITdwbOVE8bZqDYytFcE7_FBRsE5AckE1dWG7Zn-QKS5uEMekxwa50fZRWqnxDl8uJQBI3EC6r3xdZvFniKDJ4oD3oVCb1cTWvurrj86B786l2-uLk5TY-BjBK_YpcQhcj4Q6AYd0ksdKCJSrhZ5HtoHjG3crGombImZKjxI889cDDbM3xOYZp8PHYo7-uhYbsSZqGffSAye940qONwZXDlMoiPQ6yztpWRWKfHtEu_G8Wb50Behni_WU2zQcBiH19ZeaPLue80prVCMgRnbowsjk9hj45jouLtptSDmxhp6LKgF20bNmwBVHhKzKU-IDmf3QfQ_EoB5R-PrdCitUPNuAie_4SrMJvrFOfVLJWjLFGemp84X3d_vJALGgFHjElklUbT9zIDFqgRKGnQ_YsfbTCSqIijiE0LoDOR7v331O3GFk-y5CNJBBQcQCHHiCONwDTN4ofRaptryz8qtKnocITmfMjiv4');
         }
 
         return $user;

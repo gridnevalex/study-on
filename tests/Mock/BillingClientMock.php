@@ -3,6 +3,7 @@
 namespace App\Tests\Mock;
 
 use App\Service\BillingClient;
+use Cocur\Slugify\Slugify;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class BillingClientMock extends BillingClient
@@ -109,6 +110,48 @@ class BillingClientMock extends BillingClient
         }
     }
 
+    public function addCourse($course, $token)
+    {
+        if (isset($token)) {
+            if (!isset($course['name']) || !isset($course['type']) || !isset($course['price'])) {
+                return ['code' => 400, 'message' => 'This value must no be empty'];
+            } else {
+                $slugify = new Slugify();
+                $tempArray['code'] = $slugify->slugify($course['name']);
+                $tempArray['title'] = $course['name'];
+                $tempArray['type'] = $course['type'];
+                $tempArray['price'] = $course['price'];
+                array_push($this->coursesResponse, $tempArray);
+                return ['success' => 'true'];
+            }
+        }
+    }
+
+    public function updateCourse($course, $slug, $token)
+    {
+        if (isset($token)) {
+            if (!isset($course['name']) || !isset($course['type']) || !isset($course['price'])) {
+                return ['code' => 400, 'message' => 'This value must no be empty'];
+            } else {
+                $slugify = new Slugify();
+                $tempArray['code'] = $slugify->slugify($course['name']);
+                $tempArray['title'] = $course['name'];
+                $tempArray['type'] = $course['type'];
+                $tempArray['price'] = $course['price'];
+                array_push($this->coursesResponse, $tempArray);
+                return ['success' => 'true'];
+            }
+        }
+    }
+
+    public function deleteCourse($slug, $token)
+    {
+        if (isset($token)) {
+            $this->removeElementByValue($this->coursesResponse, "code", $slug);
+            return ['success' => 'true'];
+        }
+    }
+
     public function getPaymentTransactions($token)
     {
         if (isset($token)) {
@@ -138,5 +181,15 @@ class BillingClientMock extends BillingClient
             }
             return $result;
         }
+    }
+
+    public function removeElementByValue($array, $key, $value)
+    {
+        foreach ($array as $subKey => $subArray) {
+            if ($subArray[$key] == $value) {
+                unset($array[$subKey]);
+            }
+        }
+        return $array;
     }
 }
