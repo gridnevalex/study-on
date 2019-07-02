@@ -120,15 +120,8 @@ class CourseControllerTest extends AbstractTest
     public function testCourseDeleteWithLessons()
     {
         $client = $this->authClient('adminUser@gmail.com', 'passwordForAdminUser');
-        $crawler = $client->clickLink('Новый курс');
-        $form = $crawler->selectButton('Сохранить')->form();
-        $form["course[name]"] = 'new course';
-        $form["course[description]"] = 'Описание нового курса';
-        $form["course[type]"] = 'buy';
-        $form["course[price]"] = '50.5';
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-        $link = $crawler->filter('a')->last();
+        $crawler = $client->request('GET', '/courses/');
+        $link = $crawler->filter('a')->eq(4);
         $client->clickLink($link->text());
         $crawler = $client->clickLink('Добавить урок');
         $form = $crawler->selectButton('Сохранить')->form();
@@ -140,7 +133,7 @@ class CourseControllerTest extends AbstractTest
         $form = $crawler->selectButton('Удалить')->form();
         $client->submit($form);
         $crawler = $client->followRedirect();
-        $this->assertEquals(4, $crawler->filter('.card-title')->count());
+        $this->assertEquals(3, $crawler->filter('.card-title')->count());
     }
 
     public function testCourseAddWithBlankName()
