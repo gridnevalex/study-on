@@ -75,6 +75,8 @@ class CourseControllerTest extends AbstractTest
     public function testCourse404()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/mern-stack');
         $this->assertEquals(404, $client->getResponse()->getStatusCode());
     }
