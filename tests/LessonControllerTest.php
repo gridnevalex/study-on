@@ -60,6 +60,8 @@ class LessonControllerTest extends AbstractTest
     public function testCountLessons()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
         $crawler = $client->clickLink('Пройти курс');
         $this->assertEquals(1, $crawler->filter('.lessonShow')->count());
@@ -201,6 +203,8 @@ class LessonControllerTest extends AbstractTest
     public function testAnonymousLessonShow()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
         $crawler = $client->clickLink('Пройти курс');
         $link = $crawler->filter('.lessonShow')->first();

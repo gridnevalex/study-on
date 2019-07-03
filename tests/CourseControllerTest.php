@@ -32,6 +32,8 @@ class CourseControllerTest extends AbstractTest
     public function testIndexResponse()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $client->request('GET', '/courses/');
         $this->assertSame(200, $client->getResponse()->getStatusCode());
     }
@@ -46,7 +48,9 @@ class CourseControllerTest extends AbstractTest
     public function testShowResponse()
     {
         $client = static::createClient();
-        $client->request('GET', '/courses/');
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
+        $crawler = $client->request('GET', '/courses/');
         $client->clickLink('Пройти курс');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
@@ -62,6 +66,8 @@ class CourseControllerTest extends AbstractTest
     public function testCountCourses()
     {
         $client = static::createClient();
+        $client->disableReboot();
+        $client->getContainer()->set('App\Service\BillingClient', new BillingClientMock($_ENV['BILLING_HOST']));
         $crawler = $client->request('GET', '/courses/');
         $this->assertEquals(4, $crawler->filter('.card-title')->count());
     }
