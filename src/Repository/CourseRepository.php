@@ -36,21 +36,18 @@ class CourseRepository extends ServiceEntityRepository
         return $finalSlugs;
     }
 
-    public function findAllCombined($billingClient, $user)
+    public function findAllCombined($coursesBilling, $userTransactions)
     {
         $coursesStudyOn = $this->createQueryBuilder('c')
             ->select('c.id', 'c.name', 'c.description', 'c.slug')
             ->getQuery()
             ->getResult();
-                   
-        $coursesBilling = $billingClient->getCourses();
 
         $combinedCourses = $this->mergeByCode($coursesStudyOn, $coursesBilling, function ($item1, $item2) {
             return $item1['slug'] == $item2['code'];
         });
 
-        if (isset($user)) {
-            $userTransactions = $billingClient->getPaymentTransactions($user->getApiToken());
+        if (isset($userTransactions)) {
             if ($userTransactions == '') {
                 return $combinedCourses;
             } else {
@@ -68,7 +65,7 @@ class CourseRepository extends ServiceEntityRepository
         return $combinedCourses;
     }
 
-    public function findOneCombined($slug, $billingClient, $user)
+    public function findOneCombined($slug, $courseBilling, $userTransaction)
     {
         $course = $this->findOneBy(['slug' => $slug]);
 
@@ -82,21 +79,19 @@ class CourseRepository extends ServiceEntityRepository
             $lessons = ($course->getLessons())->matching($orderBy);
 
             $courseStudyOn = $this->createQueryBuilder('c')
-            ->select('c.id', 'c.name', 'c.description', 'c.slug')
-            ->andWhere('c.slug = :slug')->setParameter('slug', $slug)
-            ->getQuery()
-            ->getResult();
+                ->select('c.id', 'c.name', 'c.description', 'c.slug')
+                ->andWhere('c.slug = :slug')
+                ->setParameter('slug', $slug)
+                ->getQuery()
+                ->getResult();
         
-            $courseBilling = $billingClient->getCourseByCode($slug);
-
             $combinedCourse = $this->mergeByCode($courseStudyOn, $courseBilling, function ($item1, $item2) {
                 return $item1['slug'] == $item2['code'];
             });
 
             $combinedCourse[0]['lessons'] = $lessons;
 
-            if (isset($user)) {
-                $userTransaction = $billingClient->getTransactionByCode($slug, $user->getApiToken());
+            if (isset($userTransaction)) {
                 if ($userTransaction == '') {
                     return $combinedCourse[0];
                 } else {

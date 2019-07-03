@@ -24,9 +24,16 @@ class CourseController extends AbstractController
      */
     public function index(CourseRepository $courseRepository, BillingClient $billingClient): Response
     {
-        return $this->render('course/index.html.twig', [
-            'courses' => $courseRepository->findAllCombined($billingClient, $this->getUser())
+        $auth_checker = $this->get('security.authorization_checker');
+        if ($auth_checker->isGranted('ROLE_USER')) {
+            return $this->render('course/index.html.twig', [
+                'courses' => $courseRepository->findAllCombined($billingClient->getCourses(), $billingClient->getPaymentTransactions($this->getUser()->getApiToken()))
         ]);
+        } else {
+            return $this->render('course/index.html.twig', [
+                'courses' => $courseRepository->findAllCombined($billingClient->getCourses(), null)
+            ]);
+        }
     }
 
     /**
@@ -77,13 +84,13 @@ class CourseController extends AbstractController
         $auth_checker = $this->get('security.authorization_checker');
         if ($auth_checker->isGranted('ROLE_USER')) {
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser()),
+                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
                 'user_balance' => $billingClient->getCurentUserBalance($this->getUser()->getApiToken()),
                 'error' => null
             ]);
         } else {
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient, null),
+                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), null),
                 'error' => null
             ]);
         }
@@ -95,7 +102,7 @@ class CourseController extends AbstractController
      */
     public function edit($slug, Request $request, Course $course, BillingClient $billingClient): Response
     {
-        $combinedCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient, $this->getUser());
+        $combinedCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
         $form = $this->createForm(CourseType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -111,15 +118,15 @@ class CourseController extends AbstractController
             }
             if (array_key_exists('code', $editResponse)) {
                 return $this->render('course/edit.html.twig', array(
-                'course' => $combinedCourse,
-                'form' => $form->createView(),
-                'error' => $editResponse['message']
+                    'course' => $combinedCourse,
+                    'form' => $form->createView(),
+                    'error' => $editResponse['message']
                 ));
             } else {
                 $course->setName($formData['name']);
                 $course->setDescription($formData['description']);
 
-                $entityManager = $this->getDoctrine()->getManager()->flush();
+                $this->getDoctrine()->getManager()->flush();
                 return $this->redirectToRoute('course_index');
             }
         }
@@ -137,7 +144,7 @@ class CourseController extends AbstractController
     public function delete($slug, Request $request, Course $course, BillingClient $billingClient): Response
     {
         if ($this->isCsrfTokenValid('delete'.$course->getId(), $request->request->get('_token'))) {
-            $foundCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient, $this->getUser());
+            $foundCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
             try {
                 $deleteResponse = $billingClient->deleteCourse($slug, $this->getUser()->getApiToken());
             } catch (HttpException $e) {
@@ -171,18 +178,21 @@ class CourseController extends AbstractController
         } catch (HttpException $e) {
             $this->addFlash('error', 'Сервис временно недоступен. Попробуйте удалить урок позднее"');
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser())
+                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                'error' => null
             ]);
         }
         if (array_key_exists('success', $result)) {
             $this->addFlash('success', 'Курс успешно оплачен');
             return $this->render('course/show.html.twig', [
-                    'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser())
+                    'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                    'error' => null
                 ]);
         } elseif (array_key_exists('message', $result)) {
             $this->addFlash('error', $result['message']);
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient, $this->getUser())
+                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                'error' => null
             ]);
         }
     }
