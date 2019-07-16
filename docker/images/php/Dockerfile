@@ -5,6 +5,11 @@ FROM php:7.2-fpm
 # В данном случае мы установим некоторые зависимости и модули PHP.
 # Для установки модулей используем команду docker-php-ext-install.
 # На каждый RUN создается новый слой в образе, поэтому рекомендуется объединять команды.
+
+RUN docker-php-ext-install xdebug
+
+RUN docker-php-ext-enable xdebug
+
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
