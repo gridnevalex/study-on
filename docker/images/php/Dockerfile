@@ -6,21 +6,21 @@ FROM php:7.2-fpm
 # Для установки модулей используем команду docker-php-ext-install.
 # На каждый RUN создается новый слой в образе, поэтому рекомендуется объединять команды.
 
-RUN apt-get update 
-RUN apt-get install -y curl
-RUN apt-get install -y wget
-RUN apt-get install -y git
-RUN apt-get install -y libfreetype6-dev
-RUN apt-get install -y libjpeg62-turbo-dev
-RUN apt-get install -y libmcrypt-dev
-RUN apt-get install -y libpng-dev
-RUN apt-get install -y libicu-dev
-RUN apt-get install -y libxml2-dev
-RUN apt-get install -y libpq-dev
-RUN pecl install mcrypt-1.0.1 
-RUN docker-php-ext-install -j$(nproc) intl bcmath soap pgsql pdo_pgsql zip
-RUN docker-php-ext-install -j$(nproc) gd
-RUN docker-php-ext-enable mcrypt
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libmcrypt-dev \
+    libpng-dev \
+    libicu-dev \
+    libxml2-dev \
+    libpq-dev \
+    && pecl install mcrypt-1.0.1 \
+    && docker-php-ext-install -j$(nproc) intl bcmath soap pgsql pdo_pgsql zip \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-enable mcrypt
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
