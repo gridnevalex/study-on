@@ -72,7 +72,7 @@ class LessonController extends AbstractController
 
             $parentCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
        
-            if ((($parentCourse['type'] == 'rent' || $parentCourse['type'] == 'buy') && array_key_exists('transaction_type', $parentCourse)) || $parentCourse['type'] == 'free') {
+            if ((($parentCourse['type'] == 'rent' || $parentCourse['type'] == 'buy') && array_key_exists('transaction_type', $parentCourse)) || $parentCourse['type'] == 'free' || \in_array("ROLE_SUPER_ADMIN", $this->getUser()->getRoles())) {
                 return $this->render('lesson/show.html.twig', [
                 'lesson' => $lesson
             ]);
