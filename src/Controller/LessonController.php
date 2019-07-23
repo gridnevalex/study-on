@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Controller\CourseController;
 use App\Entity\Lesson;
 use App\Entity\Course;
 use App\Form\LessonType;
@@ -59,7 +60,7 @@ class LessonController extends AbstractController
      * @Route("/{id}", name="lesson_show", requirements={"id"="\d{1,10}"}, methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
-    public function show(Lesson $lesson, LessonRepository $repository, BillingClient $billingClient): Response
+    public function show(Lesson $lesson, BillingClient $billingClient, CourseController $courseController): Response
     {
         $id = $lesson->getCourse()->getId();
 
@@ -70,7 +71,7 @@ class LessonController extends AbstractController
         } else {
             $slug = $course->getSlug();
 
-            $parentCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
+            $parentCourse = $courseController->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
        
             if ((($parentCourse['type'] == 'rent' || $parentCourse['type'] == 'buy') && array_key_exists('transaction_type', $parentCourse)) || $parentCourse['type'] == 'free' || \in_array("ROLE_SUPER_ADMIN", $this->getUser()->getRoles())) {
                 return $this->render('lesson/show.html.twig', [

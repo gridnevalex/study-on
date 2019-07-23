@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Course;
+use Doctrine\Common\Collections\Criteria;
 use App\Form\CourseType;
 use App\Service\BillingClient;
 use App\Repository\CourseRepository;
@@ -22,16 +23,16 @@ class CourseController extends AbstractController
     /**
      * @Route("/", name="course_index", methods={"GET"})
      */
-    public function index(CourseRepository $courseRepository, BillingClient $billingClient): Response
+    public function index(BillingClient $billingClient): Response
     {
         $auth_checker = $this->get('security.authorization_checker');
         if ($auth_checker->isGranted('ROLE_USER')) {
             return $this->render('course/index.html.twig', [
-                'courses' => $courseRepository->findAllCombined($billingClient->getCourses(), $billingClient->getPaymentTransactions($this->getUser()->getApiToken()))
+                'courses' => $this->findAllCombined($billingClient->getCourses(), $billingClient->getPaymentTransactions($this->getUser()->getApiToken()))
         ]);
         } else {
             return $this->render('course/index.html.twig', [
-                'courses' => $courseRepository->findAllCombined($billingClient->getCourses(), null)
+                'courses' => $this->findAllCombined($billingClient->getCourses(), null)
             ]);
         }
     }
@@ -79,18 +80,18 @@ class CourseController extends AbstractController
     /**
      * @Route("/{slug}", name="course_show", methods={"GET"})
      */
-    public function show($slug, CourseRepository $courseRepository, BillingClient $billingClient): Response
+    public function show($slug, BillingClient $billingClient): Response
     {
         $auth_checker = $this->get('security.authorization_checker');
         if ($auth_checker->isGranted('ROLE_USER')) {
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                'course' => $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
                 'user_balance' => $billingClient->getCurentUserBalance($this->getUser()->getApiToken()),
                 'error' => null
             ]);
         } else {
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), null),
+                'course' => $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), null),
                 'error' => null
             ]);
         }
@@ -102,7 +103,7 @@ class CourseController extends AbstractController
      */
     public function edit($slug, Request $request, Course $course, BillingClient $billingClient): Response
     {
-        $combinedCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
+        $combinedCourse = $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
         $form = $this->createForm(CourseType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -144,7 +145,7 @@ class CourseController extends AbstractController
     public function delete($slug, Request $request, Course $course, BillingClient $billingClient): Response
     {
         if ($this->isCsrfTokenValid('delete'.$course->getId(), $request->request->get('_token'))) {
-            $foundCourse = $this->getDoctrine()->getRepository(Course::class)->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
+            $foundCourse = $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken()));
             try {
                 $deleteResponse = $billingClient->deleteCourse($slug, $this->getUser()->getApiToken());
             } catch (HttpException $e) {
@@ -171,29 +172,112 @@ class CourseController extends AbstractController
      * @Route("/coursepay/{slug}", name="course_pay", methods={"POST"})
      * @IsGranted("ROLE_USER")
      */
-    public function buyCourse($slug, BillingClient $billingClient, CourseRepository $courseRepository): Response
+    public function buyCourse($slug, BillingClient $billingClient): Response
     {
         try {
             $result = $billingClient->buyCourse($slug, $this->getUser()->getApiToken());
         } catch (HttpException $e) {
             $this->addFlash('error', 'Сервис временно недоступен. Попробуйте удалить урок позднее"');
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                'course' => $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
                 'error' => null
             ]);
         }
         if (array_key_exists('success', $result)) {
             $this->addFlash('success', 'Курс успешно оплачен');
             return $this->render('course/show.html.twig', [
-                    'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                    'course' => $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
                     'error' => null
                 ]);
         } elseif (array_key_exists('message', $result)) {
             $this->addFlash('error', $result['message']);
             return $this->render('course/show.html.twig', [
-                'course' => $courseRepository->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
+                'course' => $this->findOneCombined($slug, $billingClient->getCourseByCode($slug), $billingClient->getTransactionByCode($slug, $this->getUser()->getApiToken())),
                 'error' => null
             ]);
         }
+    }
+
+    public function findAllCombined($coursesBilling, $userTransactions)
+    {
+        $coursesStudyOn = $this->getDoctrine()->getRepository(Course::class)->createQueryBuilder('c')
+            ->select('c.id', 'c.name', 'c.description', 'c.slug')
+            ->getQuery()
+            ->getResult();
+
+        $combinedCourses = $this->mergeByCode($coursesStudyOn, $coursesBilling, function ($item1, $item2) {
+            return $item1['slug'] == $item2['code'];
+        });
+
+        if (isset($userTransactions)) {
+            if ($userTransactions == '') {
+                return $combinedCourses;
+            } else {
+                for ($i = 0; $i < count($combinedCourses); $i++) {
+                    foreach ($userTransactions as $transaction) {
+                        if ($transaction['course_code'] == $combinedCourses[$i]['slug']) {
+                            $combinedCourses[$i]['transaction_type'] = $transaction['type'];
+                            $combinedCourses[$i]['expires_at'] = $transaction['expires_at'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $combinedCourses;
+    }
+
+    public function findOneCombined($slug, $courseBilling, $userTransaction)
+    {
+        $course = $this->getDoctrine()->getRepository(Course::class)->findOneBy(['slug' => $slug]);
+
+        if (!$course) {
+            throw new HttpException(404);
+        } else {
+            $orderBy = (Criteria::create())->orderBy([
+                'serialNumber' => Criteria::ASC,
+            ]);
+
+            $lessons = ($course->getLessons())->matching($orderBy);
+
+            $courseStudyOn = $this->getDoctrine()->getRepository(Course::class)->createQueryBuilder('c')
+                ->select('c.id', 'c.name', 'c.description', 'c.slug')
+                ->andWhere('c.slug = :slug')
+                ->setParameter('slug', $slug)
+                ->getQuery()
+                ->getResult();
+        
+            $combinedCourse = $this->mergeByCode($courseStudyOn, $courseBilling, function ($item1, $item2) {
+                return $item1['slug'] == $item2['code'];
+            });
+
+            $combinedCourse[0]['lessons'] = $lessons;
+
+            if (isset($userTransaction)) {
+                if ($userTransaction == '') {
+                    return $combinedCourse[0];
+                } else {
+                    $combinedCourse[0]['transaction_type'] = $userTransaction[0]['type'];
+                    $combinedCourse[0]['expires_at'] = $userTransaction[0]['expires_at'];
+                }
+            }
+
+            return $combinedCourse[0];
+        }
+    }
+
+    public function mergeByCode($array1, $array2, $predicate)
+    {
+        $result = array();
+    
+        foreach ($array1 as $item1) {
+            foreach ($array2 as $item2) {
+                if ($predicate($item1, $item2)) {
+                    $result[] = array_merge($item1, $item2);
+                }
+            }
+        }
+    
+        return $result;
     }
 }

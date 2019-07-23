@@ -21,7 +21,7 @@
                 <tbody>
                     {% for transaction in transactions %}
                         <tr>
-                            <td>{{ transaction.created_at| date("d.m.Y / h:i") }}</td>
+                            <td>{{ transaction.created_at| date("d.m.Y / H:i") }}</td>
                             {% if transaction.type is same as('payment') %}
                                 <td>Оплата</td>
                             {% else %}
@@ -39,7 +39,7 @@
                                 <td>-</td>
                             {% endif %}
                             <td>{{ transaction.amount }}</td>
-                            <td>{{ transaction.expires_at| date("d.m.Y / h:i")  }}</td>
+                            <td>{{ transaction.expires_at| date("d.m.Y / H:i")  }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
